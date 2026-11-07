@@ -104,6 +104,7 @@ code {
 pre {
   margin: 0;
   padding: 18px 20px;
+  max-width: 100%;
   overflow: auto;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -306,6 +307,11 @@ strong {
   align-items: center;
 }
 
+.hero-grid > *,
+.split > * {
+  min-width: 0;
+}
+
 .hero h1 span {
   color: var(--accent);
 }
@@ -401,6 +407,11 @@ strong {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
+}
+
+.grid > *,
+.steps > * {
+  min-width: 0;
 }
 
 @media (max-width: 900px) {
