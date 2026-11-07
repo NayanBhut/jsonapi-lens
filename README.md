@@ -4,6 +4,8 @@ A dependency-free, browser-based JSON:API viewer, validator, and relationship ex
 
 Live site: **https://nayanbhut.github.io/jsonapi-lens/**
 
+![JSON:API Lens showing recursively expanded relationships](assets/screenshot-tree.png)
+
 - Landing page: `/`
 - Viewer: `/viewer/`
 - Guides: `/docs/jsonapi-viewer/`, `/docs/jsonapi-validator/`, `/docs/jsonapi-relationships/`, `/docs/jsonapi-vs-json/`

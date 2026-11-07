@@ -1,0 +1,21 @@
+# JSON:API Lens
+
+> Free, browser-based JSON:API viewer, validator, and relationship explorer. It expands relationships and included resources recursively, checks JSON:API 1.1 document structure, copies resolved plain JSON, and renders a relationship graph. No signup and no server-side processing.
+
+## Pages
+
+- [Home](https://nayanbhut.github.io/jsonapi-lens/): overview, features, and FAQ.
+- [Viewer](https://nayanbhut.github.io/jsonapi-lens/viewer/): the application itself.
+- [JSON:API viewer guide](https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-viewer/): how to inspect relationships and included resources.
+- [JSON:API validator guide](https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-validator/): structural rules, common errors, and limits.
+- [Relationships explained](https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-relationships/): resource linkage, compound documents, full linkage, sparse linkage, and cycles.
+- [JSON:API vs JSON](https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-vs-json/): how the specification differs from the JSON format.
+
+## Facts
+
+- Media type: application/vnd.api+json.
+- Supports JSON:API 1.0 and 1.1 documents.
+- Validation covers structure only, not business rules.
+- Parsing happens in the browser; documents are not uploaded.
+- Handles documents up to 50 MB with paged rendering.
+- Source: https://github.com/NayanBhut/jsonapi-lens
