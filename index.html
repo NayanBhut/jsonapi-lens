@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON:API Viewer, Validator &amp; Explorer — JSON:API Lens</title>
+    <meta
+      name="description"
+      content="Free online JSON:API viewer, validator and explorer. Expand relationships and included resources recursively, inspect compound documents, and check JSON:API 1.1 structure. Runs in your browser — no signup."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://nayanbhut.github.io/jsonapi-lens/" />
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <meta name="theme-color" content="#070a10" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JSON:API Lens" />
+    <meta property="og:url" content="https://nayanbhut.github.io/jsonapi-lens/" />
+    <meta property="og:title" content="JSON:API Viewer, Validator &amp; Explorer — JSON:API Lens" />
+    <meta
+      property="og:description"
+      content="Expand JSON:API relationships and included resources recursively, validate the document against the spec, and copy resolved plain JSON. Free, private, and browser-based."
+    />
+    <meta property="og:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JSON:API Viewer, Validator &amp; Explorer — JSON:API Lens" />
+    <meta
+      name="twitter:description"
+      content="Expand JSON:API relationships and included resources recursively, validate the document against the spec, and copy resolved plain JSON."
+    />
+    <meta name="twitter:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+
+    <link rel="stylesheet" href="site.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://nayanbhut.github.io/jsonapi-lens/#website",
+            "url": "https://nayanbhut.github.io/jsonapi-lens/",
+            "name": "JSON:API Lens",
+            "description": "Free JSON:API viewer, validator, and relationship explorer."
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://nayanbhut.github.io/jsonapi-lens/#app",
+            "name": "JSON:API Lens",
+            "url": "https://nayanbhut.github.io/jsonapi-lens/viewer/",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript",
+            "description": "Inspect JSON:API documents with recursive relationship expansion, spec validation, resolved JSON export, and an interactive relationship graph.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "isAccessibleForFree": true,
+            "license": "https://github.com/NayanBhut/jsonapi-lens"
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://nayanbhut.github.io/jsonapi-lens/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is a JSON:API viewer?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "A JSON:API viewer reads a JSON:API document and shows its resources, relationships, and included objects in a structured way. Unlike a plain JSON formatter, it resolves type/id linkage so you can follow relationships instead of reading raw JSON by hand."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is JSON:API Lens free?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. JSON:API Lens is free and open source. There is no signup, no paid tier, and no server-side processing."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is my JSON:API data uploaded anywhere?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Parsing, validation, and rendering happen entirely in your browser. If you fetch a URL, the request goes directly from your browser to that API, subject to its CORS policy."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does it validate JSON:API 1.1?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "JSON:API Lens checks structural JSON:API 1.1 rules: required type and string id members, reserved field names, attribute/relationship collisions, relationship shape, duplicate resources, full linkage, resource identifier objects, and error document structure. Business rules are out of scope."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Why are some relationships marked as missing?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "JSON:API allows sparse linkage: a relationship can point to a resource that is not present in data or included. Lens keeps those targets visible as missing chips with their JSON pointer so you can tell an intentionally omitted resource from a broken document."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How large a JSON:API document can it handle?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "The viewer handles documents up to 50 MB. It renders primary resources, included resources, and validation issues in pages so the page stays responsive, and it summarizes values that are too large or too deeply nested to preview."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I copy a resource as plain JSON instead of JSON:API?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. The copy button on any resource card produces plain JSON: attributes are flattened and relationships are replaced with the resolved resource data, recursively. Missing targets and cycles are marked explicitly."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="./" aria-label="JSON:API Lens home">
+          <span class="brand-mark" aria-hidden="true">{:}</span>
+          JSON:API Lens
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="viewer/">Viewer</a>
+          <a href="docs/jsonapi-validator/">Validator</a>
+          <a href="docs/jsonapi-relationships/">Relationships</a>
+          <a href="docs/jsonapi-vs-json/">JSON:API vs JSON</a>
+          <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>
+          <a class="nav-cta" href="viewer/">Open viewer</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="wrap">
+          <div class="hero-grid">
+            <div>
+              <span class="eyebrow">JSON:API 1.0 &amp; 1.1 · Free · Open source</span>
+              <h1>A JSON:API viewer that follows relationships <span>all the way down</span></h1>
+              <p class="lead">
+                Paste a JSON:API response and inspect every resource, relationship, and included object — recursively.
+                Validate the document against the spec, copy resolved plain JSON, and explore the relationship graph.
+                No signup, no upload: everything runs in your browser.
+              </p>
+              <div class="hero-actions">
+                <a class="btn btn-primary" href="viewer/">Open the viewer →</a>
+                <a class="btn" href="#how-it-works">See how it works</a>
+              </div>
+              <div class="hero-note">
+                <span>Free and open source</span>
+                <span>Files never leave your browser</span>
+                <span>No account required</span>
+              </div>
+            </div>
+            <div class="hero-shot">
+              <img
+                src="assets/screenshot-tree.png"
+                width="1440"
+                height="900"
+                alt="JSON:API Lens showing a screen resource with widgets, blocks, and actions expanded recursively"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="wrap">
+          <span class="eyebrow">Features</span>
+          <h2>Built for JSON:API, not just JSON</h2>
+          <p class="lead" style="max-width: 720px">
+            A generic formatter shows nested braces. Lens understands <code>type</code>/<code>id</code> linkage,
+            compound documents, and the rules in the JSON:API specification.
+          </p>
+
+          <div class="grid" style="margin-top: 30px">
+            <article class="card">
+              <div class="icon" aria-hidden="true">↳</div>
+              <h3>Recursive relationships</h3>
+              <p>
+                Follow <code>author → employer → owner</code> across <code>included</code> resources at any depth.
+                Cycles are detected and explained instead of looping forever.
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon" aria-hidden="true">✓</div>
+              <h3>JSON:API validation</h3>
+              <p>
+                Structural checks for JSON:API 1.1: types and string ids, reserved members, relationship shape,
+                duplicates, full linkage, and error documents — each with a JSON pointer.
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon" aria-hidden="true">{}</div>
+              <h3>Resolved JSON copy</h3>
+              <p>
+                Copy any resource as plain JSON with attributes flattened and relationships inlined. Missing targets
+                and cycles are marked explicitly, so the output is safe to paste anywhere.
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon" aria-hidden="true">◉</div>
+              <h3>Relationship graph</h3>
+              <p>
+                See the whole compound document as a layered graph. Pan, zoom, inspect edges, and reveal unresolved
+                sparse-linkage targets when you need them.
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon" aria-hidden="true">!</div>
+              <h3>Sparse linkage handling</h3>
+              <p>
+                A relationship may legally point to a resource that is not included. Lens keeps those targets visible
+                as missing chips with the exact pointer instead of silently dropping them.
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon" aria-hidden="true">▦</div>
+              <h3>Large documents</h3>
+              <p>
+                Tested with responses up to 50 MB and hundreds of thousands of resources. Paged rendering and preview
+                limits keep the page responsive instead of freezing the tab.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="how-it-works">
+        <div class="wrap">
+          <span class="eyebrow">How it works</span>
+          <h2>Three steps to a readable response</h2>
+          <div class="steps" style="margin-top: 28px">
+            <div class="step">
+              <h3>Paste, upload, or fetch</h3>
+              <p>
+                Paste a response into the editor, drop a <code>.json</code> file, or fetch a URL directly. Files are
+                parsed locally and never uploaded.
+              </p>
+            </div>
+            <div class="step">
+              <h3>Expand relationships</h3>
+              <p>
+                Click a relationship to follow it, or use <strong>Expand all</strong> up to your chosen depth. Every
+                hop keeps a breadcrumb and a JSON pointer.
+              </p>
+            </div>
+            <div class="step">
+              <h3>Validate and copy</h3>
+              <p>
+                Review the Issues tab for spec violations, then copy resolved JSON for a single resource or the whole
+                document.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap">
+          <div class="split">
+            <div>
+              <span class="eyebrow">Why a dedicated tool</span>
+              <h2>Why not just a JSON formatter?</h2>
+              <p class="lead">
+                JSON:API moves relationship data out of the resource and into resource linkage. To understand a
+                response you have to resolve <code>type</code> and <code>id</code> pairs against the
+                <code>included</code> array — often several hops deep.
+              </p>
+              <p class="muted">
+                A formatter cannot tell you that <code>people:9</code> is the author, that the author's employer is
+                missing from the response, or that an included resource is never referenced. Lens can.
+              </p>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <caption class="sr-only" style="position: absolute; left: -9999px">
+                  Comparison of a generic JSON formatter and JSON:API Lens
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Task</th>
+                    <th scope="col">JSON formatter</th>
+                    <th scope="col">Lens</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Pretty-print nested JSON</td>
+                    <td>Yes</td>
+                    <td><strong>Yes</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Resolve <code>type</code>/<code>id</code> linkage</td>
+                    <td>No</td>
+                    <td><strong>Yes</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Expand relationships recursively</td>
+                    <td>No</td>
+                    <td><strong>Yes</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Detect cycles and missing resources</td>
+                    <td>No</td>
+                    <td><strong>Yes</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Validate JSON:API 1.1 structure</td>
+                    <td>No</td>
+                    <td><strong>Yes</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Export a resource as plain JSON</td>
+                    <td>No</td>
+                    <td><strong>Yes</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap">
+          <div class="split">
+            <div>
+              <span class="eyebrow">Background</span>
+              <h2>JSON:API in 30 seconds</h2>
+              <p>
+                JSON:API is a specification for building APIs in JSON. It standardises resource objects,
+                relationships, compound documents, errors, pagination, filtering, and sparse fieldsets, using the
+                media type <code>application/vnd.api+json</code>.
+              </p>
+              <p>
+                A document has top-level <code>data</code> (one resource or a collection) and optionally
+                <code>included</code>, <code>links</code>, <code>meta</code>, <code>jsonapi</code>, or
+                <code>errors</code>. Each resource has a <code>type</code>, an <code>id</code>, and optional
+                <code>attributes</code> and <code>relationships</code>.
+              </p>
+              <p class="small muted">
+                Read the full specification at
+                <a href="https://jsonapi.org/format/" rel="noopener">jsonapi.org</a>, or see
+                <a href="docs/jsonapi-relationships/">how relationships and included resources work</a>.
+              </p>
+            </div>
+            <div>
+              <pre><code>{
+  "data": {
+    "type": "articles",
+    "id": "1",
+    "attributes": { "title": "JSON:API paints my bikeshed!" },
+    "relationships": {
+      "author": {
+        "data": { "type": "people", "id": "9" }
+      }
+    }
+  },
+  "included": [
+    {
+      "type": "people",
+      "id": "9",
+      "attributes": { "name": "Dan Gebhardt" }
+    }
+  ]
+}</code></pre>
+              <p class="small muted" style="margin-top: 12px">
+                The relationship only contains a pointer. The actual person lives in <code>included</code>. Lens
+                resolves that pointer for you — and keeps going from there.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="faq">
+        <div class="wrap">
+          <span class="eyebrow">FAQ</span>
+          <h2>Frequently asked questions</h2>
+          <div class="faq" style="margin-top: 26px">
+            <details open>
+              <summary>What is a JSON:API viewer?</summary>
+              <div class="faq-body">
+                <p>
+                  A JSON:API viewer reads a JSON:API document and shows its resources, relationships, and included
+                  objects in a structured way. Unlike a plain JSON formatter, it resolves <code>type</code>/<code
+                    >id</code
+                  >
+                  linkage so you can follow relationships instead of reading raw JSON by hand.
+                </p>
+              </div>
+            </details>
+            <details>
+              <summary>Is JSON:API Lens free?</summary>
+              <div class="faq-body">
+                <p>
+                  Yes. JSON:API Lens is free and open source. There is no signup, no paid tier, and no server-side
+                  processing.
+                </p>
+              </div>
+            </details>
+            <details>
+              <summary>Is my JSON:API data uploaded anywhere?</summary>
+              <div class="faq-body">
+                <p>
+                  No. Parsing, validation, and rendering happen entirely in your browser. If you fetch a URL, the
+                  request goes directly from your browser to that API, subject to its CORS policy.
+                </p>
+              </div>
+            </details>
+            <details>
+              <summary>Does it validate JSON:API 1.1?</summary>
+              <div class="faq-body">
+                <p>
+                  JSON:API Lens checks structural JSON:API 1.1 rules: required type and string id members, reserved
+                  field names, attribute/relationship collisions, relationship shape, duplicate resources, full
+                  linkage, resource identifier objects, and error document structure. Business rules are out of
+                  scope.
+                </p>
+              </div>
+            </details>
+            <details>
+              <summary>Why are some relationships marked as missing?</summary>
+              <div class="faq-body">
+                <p>
+                  JSON:API allows sparse linkage: a relationship can point to a resource that is not present in
+                  <code>data</code> or <code>included</code>. Lens keeps those targets visible as missing chips with
+                  their JSON pointer so you can tell an intentionally omitted resource from a broken document.
+                </p>
+              </div>
+            </details>
+            <details>
+              <summary>How large a JSON:API document can it handle?</summary>
+              <div class="faq-body">
+                <p>
+                  The viewer handles documents up to 50 MB. It renders primary resources, included resources, and
+                  validation issues in pages so the page stays responsive, and it summarizes values that are too
+                  large or too deeply nested to preview.
+                </p>
+              </div>
+            </details>
+            <details>
+              <summary>Can I copy a resource as plain JSON instead of JSON:API?</summary>
+              <div class="faq-body">
+                <p>
+                  Yes. The copy button on any resource card produces plain JSON: attributes are flattened and
+                  relationships are replaced with the resolved resource data, recursively. Missing targets and cycles
+                  are marked explicitly.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-tight">
+        <div class="wrap">
+          <div class="cta">
+            <div>
+              <h2>Open a JSON:API response and make sense of it</h2>
+              <p>Free, private, and no account required. Works with JSON:API 1.0 and 1.1.</p>
+            </div>
+            <a class="btn btn-primary" href="viewer/">Open the viewer →</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>
+          <a class="brand" href="./">
+            <span class="brand-mark" aria-hidden="true">{:}</span>
+            JSON:API Lens
+          </a>
+          <p class="fine">
+            A free, browser-based JSON:API viewer, validator, and relationship explorer. Open source on
+            <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>.
+          </p>
+        </div>
+        <div>
+          <h3>Product</h3>
+          <ul>
+            <li><a href="viewer/">JSON:API viewer</a></li>
+            <li><a href="docs/jsonapi-validator/">JSON:API validator</a></li>
+            <li><a href="docs/jsonapi-relationships/">Relationships guide</a></li>
+            <li><a href="docs/jsonapi-vs-json/">JSON:API vs JSON</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="https://jsonapi.org/format/" rel="noopener">JSON:API specification</a></li>
+            <li><a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">Source code</a></li>
+            <li><a href="https://github.com/NayanBhut/jsonapi-lens#readme" rel="noopener">README</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON:API Relationships &amp; Included Resources Explained</title>
+    <meta
+      name="description"
+      content="Learn how JSON:API relationships, resource linkage, compound documents, included resources, sparse fieldsets, and full linkage work — with examples you can inspect."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-relationships/" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <meta name="theme-color" content="#070a10" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="JSON:API Lens" />
+    <meta property="og:url" content="https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-relationships/" />
+    <meta property="og:title" content="JSON:API Relationships &amp; Included Resources Explained" />
+    <meta
+      property="og:description"
+      content="How JSON:API relationships, resource linkage, compound documents, included resources, and full linkage work — with examples."
+    />
+    <meta property="og:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JSON:API Relationships &amp; Included Resources Explained" />
+    <meta
+      name="twitter:description"
+      content="How JSON:API relationships, resource linkage, compound documents, included resources, and full linkage work — with examples."
+    />
+    <meta name="twitter:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+
+    <link rel="stylesheet" href="../../site.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://nayanbhut.github.io/jsonapi-lens/" },
+              { "@type": "ListItem", "position": 2, "name": "JSON:API relationships", "item": "https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-relationships/" }
+            ]
+          },
+          {
+            "@type": "Article",
+            "headline": "JSON:API relationships and included resources explained",
+            "description": "A practical explanation of JSON:API relationships, resource linkage, compound documents, included resources, and full linkage.",
+            "author": { "@type": "Organization", "name": "JSON:API Lens" },
+            "publisher": { "@type": "Organization", "name": "JSON:API Lens" },
+            "mainEntityOfPage": "https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-relationships/"
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is the difference between relationships and included in JSON:API?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "A relationship holds resource linkage: the type and id of related resources. The included array holds the full resource objects. A client resolves linkage against included to get attributes."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What is full linkage in JSON:API?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Full linkage means every resource in included must be reachable from the primary data through a chain of relationships. Included resources that nothing points to are a specification violation."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can a JSON:API relationship point to a missing resource?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Sparse linkage is allowed: a relationship may reference a resource that is not present in data or included. The client can still show the identifier, and a viewer should mark it as missing rather than dropping it."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="../../" aria-label="JSON:API Lens home">
+          <span class="brand-mark" aria-hidden="true">{:}</span>
+          JSON:API Lens
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="../../viewer/">Viewer</a>
+          <a href="../jsonapi-validator/">Validator</a>
+          <a href="../jsonapi-relationships/">Relationships</a>
+          <a href="../jsonapi-vs-json/">JSON:API vs JSON</a>
+          <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>
+          <a class="nav-cta" href="../../viewer/">Open viewer</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <div class="doc-hero">
+          <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <a href="../../">Home</a><span>/</span><span>Docs</span><span>/</span><span>JSON:API relationships</span>
+          </nav>
+          <span class="eyebrow">Guide</span>
+          <h1>JSON:API relationships and included resources explained</h1>
+          <p class="lead" style="max-width: 760px">
+            Relationships are the part of JSON:API that surprises people most. A relationship does not contain the
+            related object — it contains a pointer. The object itself may be in <code>included</code>, somewhere else
+            entirely, or not in the response at all.
+          </p>
+        </div>
+
+        <div class="doc-layout">
+          <article class="doc-body">
+            <h2 id="resource">Resource objects, attributes, and relationships</h2>
+            <p>
+              A JSON:API <strong>resource object</strong> has a <code>type</code> and an <code>id</code>, plus optional
+              <code>attributes</code>, <code>relationships</code>, <code>links</code>, and <code>meta</code>.
+              Attributes hold the resource's own data. Relationships describe connections to other resources.
+            </p>
+            <pre><code>{
+  "type": "articles",
+  "id": "1",
+  "attributes": {
+    "title": "JSON:API paints my bikeshed!"
+  },
+  "relationships": {
+    "author": {
+      "data": { "type": "people", "id": "9" }
+    }
+  }
+}</code></pre>
+            <p>
+              Notice that the author's name is not here. The relationship only says “this article's author is the
+              resource of type <code>people</code> with id <code>9</code>”. That pair is called
+              <strong>resource linkage</strong>.
+            </p>
+
+            <h2 id="linkage">Resource linkage and relationship objects</h2>
+            <p>
+              A relationship object may contain <code>links</code>, <code>data</code>, and <code>meta</code>. The
+              <code>data</code> member is the linkage: a single resource identifier object for a to-one relationship,
+              an array for a to-many relationship, or <code>null</code> for an empty to-one relationship.
+            </p>
+            <pre><code>"relationships": {
+  "author":   { "data": { "type": "people", "id": "9" } },
+  "comments": { "data": [
+    { "type": "comments", "id": "5" },
+    { "type": "comments", "id": "12" }
+  ] }
+}</code></pre>
+            <p>
+              Resource identifier objects have a <code>type</code> and an <code>id</code> (or <code>lid</code> for
+              local identities in a create request). They do not carry attributes. To get the attributes, the client
+              must resolve the identifier against <code>included</code>.
+            </p>
+
+            <h2 id="included">Compound documents and <code>included</code></h2>
+            <p>
+              A document that contains both primary <code>data</code> and related resources in <code>included</code>
+              is a <strong>compound document</strong>. This lets a server return an article, its author, and its
+              comments in one response without duplicating data inside each relationship.
+            </p>
+            <pre><code>{
+  "data": {
+    "type": "articles",
+    "id": "1",
+    "attributes": { "title": "JSON:API paints my bikeshed!" },
+    "relationships": {
+      "author": { "data": { "type": "people", "id": "9" } }
+    }
+  },
+  "included": [
+    {
+      "type": "people",
+      "id": "9",
+      "attributes": { "name": "Dan Gebhardt" },
+      "relationships": {
+        "employer": { "data": { "type": "companies", "id": "1" } }
+      }
+    }
+  ]
+}</code></pre>
+            <p>
+              Resolving the chain gives you <em>articles #1 → author → people #9 → employer → companies #1</em>. If
+              <code>companies:1</code> is not present, the employer relationship is sparse.
+            </p>
+
+            <h2 id="full-linkage">The full linkage rule</h2>
+            <p>
+              JSON:API requires <strong>full linkage</strong>: every resource in <code>included</code> must be
+              reachable from the primary data through relationships, directly or indirectly. An included resource that
+              nothing points to is a specification violation. The validator flags these as unlinked.
+            </p>
+            <p>
+              The rule exists so clients can trust that <code>included</code> is exactly the set of related resources
+              needed to resolve the document — not an arbitrary dump of rows.
+            </p>
+
+            <h2 id="sparse">Sparse linkage and <code>include</code></h2>
+            <p>
+              The <code>include</code> query parameter asks the server to return related resources in
+              <code>included</code>. It is usually a comma-separated path such as
+              <code>include=author,comments.author</code>. Servers may return only part of the requested graph, and a
+              relationship can point to a resource that is not included at all. This is called
+              <strong>sparse linkage</strong> and is allowed by the specification.
+            </p>
+            <p>
+              This is why a good viewer distinguishes three states: <em>resolved</em> (the object is present),
+              <em>missing</em> (linkage exists, object does not), and <em>empty</em> (<code>data: null</code>).
+            </p>
+
+            <h2 id="cycles">Cycles</h2>
+            <p>
+              Relationships can form cycles. A person manages a team, the team includes the person, and an article
+              points to both. Recursive viewers must detect when a resource already appears on the current path and
+              stop, or they will loop forever. JSON:API Lens shows a cycle marker with the path that closes the loop.
+            </p>
+
+            <h2 id="inspect">Inspect a real relationship graph</h2>
+            <p>
+              The fastest way to understand a document is to open it in the
+              <a href="../../viewer/">JSON:API viewer</a>. Expand a relationship, follow it two or three hops, and
+              watch the breadcrumbs and JSON pointers. The Graph tab shows the same structure as a node graph, with
+              unresolved targets hidden by default.
+            </p>
+
+            <h2 id="faq">Frequently asked questions</h2>
+            <div class="faq">
+              <details open>
+                <summary>What is the difference between relationships and included in JSON:API?</summary>
+                <div class="faq-body">
+                  <p>
+                    A relationship holds resource linkage: the type and id of related resources. The
+                    <code>included</code> array holds the full resource objects. A client resolves linkage against
+                    <code>included</code> to get attributes.
+                  </p>
+                </div>
+              </details>
+              <details>
+                <summary>What is full linkage in JSON:API?</summary>
+                <div class="faq-body">
+                  <p>
+                    Full linkage means every resource in <code>included</code> must be reachable from the primary data
+                    through a chain of relationships. Included resources that nothing points to are a specification
+                    violation.
+                  </p>
+                </div>
+              </details>
+              <details>
+                <summary>Can a JSON:API relationship point to a missing resource?</summary>
+                <div class="faq-body">
+                  <p>
+                    Yes. Sparse linkage is allowed: a relationship may reference a resource that is not present in
+                    <code>data</code> or <code>included</code>. The client can still show the identifier, and a viewer
+                    should mark it as missing rather than dropping it.
+                  </p>
+                </div>
+              </details>
+            </div>
+
+            <div class="cta" style="margin-top: 40px">
+              <div>
+                <h2>Follow a relationship chain yourself</h2>
+                <p>Open a document and expand it hop by hop.</p>
+              </div>
+              <a class="btn btn-primary" href="../../viewer/">Open the viewer →</a>
+            </div>
+          </article>
+
+          <aside class="doc-aside">
+            <h3>On this page</h3>
+            <ul>
+              <li><a href="#resource">Resource objects</a></li>
+              <li><a href="#linkage">Resource linkage</a></li>
+              <li><a href="#included">Compound documents</a></li>
+              <li><a href="#full-linkage">Full linkage</a></li>
+              <li><a href="#sparse">Sparse linkage</a></li>
+              <li><a href="#cycles">Cycles</a></li>
+              <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <h3 style="margin-top: 20px">Related</h3>
+            <ul>
+              <li><a href="../jsonapi-viewer/">JSON:API viewer</a></li>
+              <li><a href="../jsonapi-validator/">JSON:API validator</a></li>
+              <li><a href="../jsonapi-vs-json/">JSON:API vs JSON</a></li>
+            </ul>
+            <a class="btn btn-primary" href="../../viewer/">Open the viewer</a>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>
+          <a class="brand" href="../../"><span class="brand-mark" aria-hidden="true">{:}</span> JSON:API Lens</a>
+          <p class="fine">
+            A free, browser-based JSON:API viewer, validator, and relationship explorer. Open source on
+            <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>.
+          </p>
+        </div>
+        <div>
+          <h3>Product</h3>
+          <ul>
+            <li><a href="../../viewer/">JSON:API viewer</a></li>
+            <li><a href="../jsonapi-validator/">JSON:API validator</a></li>
+            <li><a href="../jsonapi-relationships/">Relationships guide</a></li>
+            <li><a href="../jsonapi-vs-json/">JSON:API vs JSON</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="https://jsonapi.org/format/" rel="noopener">JSON:API specification</a></li>
+            <li><a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">Source code</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

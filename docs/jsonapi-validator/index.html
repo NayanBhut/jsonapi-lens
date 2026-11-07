@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON:API Validator — Check a Document Against JSON:API 1.1</title>
+    <meta
+      name="description"
+      content="Free online JSON:API validator. Check a document against JSON:API 1.1 structure rules: types, string ids, relationship shape, duplicates, full linkage, and error documents."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-validator/" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <meta name="theme-color" content="#070a10" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="JSON:API Lens" />
+    <meta property="og:url" content="https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-validator/" />
+    <meta property="og:title" content="JSON:API Validator — Check a Document Against JSON:API 1.1" />
+    <meta
+      property="og:description"
+      content="Check JSON:API documents for structural violations: types, string ids, relationship shape, duplicates, full linkage, and error documents."
+    />
+    <meta property="og:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JSON:API Validator — Check a Document Against JSON:API 1.1" />
+    <meta
+      name="twitter:description"
+      content="Check JSON:API documents for structural violations: types, string ids, relationship shape, duplicates, full linkage, and error documents."
+    />
+    <meta name="twitter:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+
+    <link rel="stylesheet" href="../../site.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://nayanbhut.github.io/jsonapi-lens/" },
+              { "@type": "ListItem", "position": 2, "name": "JSON:API validator", "item": "https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-validator/" }
+            ]
+          },
+          {
+            "@type": "Article",
+            "headline": "JSON:API validator: check a document against JSON:API 1.1",
+            "description": "How to validate JSON:API documents against the structural rules of the JSON:API 1.1 specification.",
+            "author": { "@type": "Organization", "name": "JSON:API Lens" },
+            "publisher": { "@type": "Organization", "name": "JSON:API Lens" },
+            "mainEntityOfPage": "https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-validator/"
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What does a JSON:API validator check?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "It checks structural rules from the JSON:API 1.1 specification: required type and string id members, reserved field names, attribute and relationship collisions, relationship object shape, duplicate resources, full linkage from primary data, resource identifier objects, data and errors exclusivity, and error document structure."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Does the validator check my business rules?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. It validates the JSON:API document structure only. Required attributes, authorization, and domain-specific rules are outside the scope of the specification and of this validator."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is the JSON:API validator free?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. It is free, open source, and runs entirely in your browser. No document is uploaded."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="../../" aria-label="JSON:API Lens home">
+          <span class="brand-mark" aria-hidden="true">{:}</span>
+          JSON:API Lens
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="../../viewer/">Viewer</a>
+          <a href="../jsonapi-validator/">Validator</a>
+          <a href="../jsonapi-relationships/">Relationships</a>
+          <a href="../jsonapi-vs-json/">JSON:API vs JSON</a>
+          <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>
+          <a class="nav-cta" href="../../viewer/">Open viewer</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <div class="doc-hero">
+          <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <a href="../../">Home</a><span>/</span><span>Docs</span><span>/</span><span>JSON:API validator</span>
+          </nav>
+          <span class="eyebrow">Guide</span>
+          <h1>JSON:API validator: check a document against JSON:API 1.1</h1>
+          <p class="lead" style="max-width: 760px">
+            A JSON:API document can be valid JSON and still break the specification. The validator in JSON:API Lens
+            checks the structural rules that matter to clients and servers, then points at the exact JSON location of
+            every problem.
+          </p>
+        </div>
+
+        <div class="doc-layout">
+          <article class="doc-body">
+            <h2 id="what">What the validator checks</h2>
+            <p>
+              JSON:API Lens runs the following checks against every document. Each finding includes a severity, a
+              rule name, an explanation, and a JSON pointer.
+            </p>
+            <ul>
+              <li><strong>Required type identifiers and string ids</strong> — every resource needs a <code>type</code>, and <code>id</code> must be a string.</li>
+              <li><strong>Reserved field names</strong> — <code>type</code>, <code>id</code>, and <code>lid</code> cannot appear inside <code>attributes</code>.</li>
+              <li><strong>Attribute / relationship collisions</strong> — the same name cannot be both an attribute and a relationship.</li>
+              <li><strong>Relationship object shape</strong> — <code>data</code>, <code>links</code>, and <code>meta</code> must have the correct types, including <code>null</code> and arrays for to-many relationships.</li>
+              <li><strong>Duplicate resources</strong> — the same <code>type</code>/<code>id</code> pair must not appear twice in <code>data</code> or <code>included</code>.</li>
+              <li><strong>Full linkage</strong> — every included resource must be reachable from the primary data through relationships.</li>
+              <li><strong>Resource identifier objects</strong> — linkage objects need a valid <code>type</code> and <code>id</code>/<code>lid</code>.</li>
+              <li><strong>Top-level data / errors exclusivity</strong> — a document must not contain both <code>data</code> and <code>errors</code>.</li>
+              <li><strong>Error document structure</strong> — error objects must follow the specification's shape.</li>
+            </ul>
+            <p class="small muted">
+              The full rule set is implemented in <code>core.js</code> and covered by the project's test suite. The
+              validator targets JSON:API 1.1; documents written for 1.0 generally pass as well.
+            </p>
+
+            <h2 id="how">How to validate a JSON:API response</h2>
+            <ol>
+              <li>Open the <a href="../../viewer/">viewer</a> and paste or upload the document.</li>
+              <li>Look at the summary bar: it shows error and warning counts immediately.</li>
+              <li>Open the <strong>Issues</strong> tab for the full report, grouped by severity.</li>
+              <li>Use the JSON pointer on each finding to jump to the exact location in the document.</li>
+            </ol>
+            <p>
+              Validation runs locally and instantly. Large reports are paginated, and <strong>Copy all issues</strong>
+              exports the complete report as JSON.
+            </p>
+
+            <h2 id="errors">Common JSON:API errors and how to fix them</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Finding</th>
+                    <th scope="col">Typical cause</th>
+                    <th scope="col">Fix</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>id must be a string</strong></td>
+                    <td>A database integer was serialized directly.</td>
+                    <td>Cast ids to strings at the serializer boundary.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>type is missing</strong></td>
+                    <td>The serializer emitted a bare object or partial resource.</td>
+                    <td>Include <code>type</code> on every resource and identifier.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>data and errors cannot coexist</strong></td>
+                    <td>An error handler merged an error into a success payload.</td>
+                    <td>Return either a data document or an errors document, never both.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Duplicate resource</strong></td>
+                    <td>The same object was added to <code>data</code> and <code>included</code>, or twice to <code>included</code>.</td>
+                    <td>Deduplicate by <code>type</code>/<code>id</code> before serializing.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Included resource is not linked</strong></td>
+                    <td>An included object is not referenced by any relationship.</td>
+                    <td>Either link it from a relationship or remove it from <code>included</code>.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Relationship data has the wrong shape</strong></td>
+                    <td>A to-one relationship was serialized as an array, or vice versa.</td>
+                    <td>Use an object or <code>null</code> for to-one, an array for to-many.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h2 id="limits">What validation cannot tell you</h2>
+            <p>
+              Structural validation is not schema validation. The validator cannot know that a <code>title</code> is
+              required by your application, that an attribute should match a pattern, or that a user is allowed to see
+              a resource. It also cannot detect a relationship that is <em>semantically</em> wrong but structurally
+              valid.
+            </p>
+            <div class="note">
+              Sparse linkage is legal. If a relationship points to a resource that is not in <code>data</code> or
+              <code>included</code>, that is not a specification violation — the viewer marks it as
+              <strong>missing</strong> so you can decide whether it was intentional.
+            </div>
+
+            <h2 id="faq">Frequently asked questions</h2>
+            <div class="faq">
+              <details open>
+                <summary>What does a JSON:API validator check?</summary>
+                <div class="faq-body">
+                  <p>
+                    It checks structural rules from the JSON:API 1.1 specification: required type and string id
+                    members, reserved field names, attribute and relationship collisions, relationship object shape,
+                    duplicate resources, full linkage from primary data, resource identifier objects, data and errors
+                    exclusivity, and error document structure.
+                  </p>
+                </div>
+              </details>
+              <details>
+                <summary>Does the validator check my business rules?</summary>
+                <div class="faq-body">
+                  <p>
+                    No. It validates the JSON:API document structure only. Required attributes, authorization, and
+                    domain-specific rules are outside the scope of the specification and of this validator.
+                  </p>
+                </div>
+              </details>
+              <details>
+                <summary>Is the JSON:API validator free?</summary>
+                <div class="faq-body">
+                  <p>Yes. It is free, open source, and runs entirely in your browser. No document is uploaded.</p>
+                </div>
+              </details>
+            </div>
+
+            <div class="cta" style="margin-top: 40px">
+              <div>
+                <h2>Validate a response now</h2>
+                <p>Structural checks, JSON pointers, and a copyable report.</p>
+              </div>
+              <a class="btn btn-primary" href="../../viewer/">Open the validator →</a>
+            </div>
+          </article>
+
+          <aside class="doc-aside">
+            <h3>On this page</h3>
+            <ul>
+              <li><a href="#what">What it checks</a></li>
+              <li><a href="#how">How to validate</a></li>
+              <li><a href="#errors">Common errors</a></li>
+              <li><a href="#limits">Limits</a></li>
+              <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <h3 style="margin-top: 20px">Related</h3>
+            <ul>
+              <li><a href="../jsonapi-viewer/">JSON:API viewer</a></li>
+              <li><a href="../jsonapi-relationships/">Relationships explained</a></li>
+              <li><a href="../jsonapi-vs-json/">JSON:API vs JSON</a></li>
+            </ul>
+            <a class="btn btn-primary" href="../../viewer/">Open the viewer</a>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>
+          <a class="brand" href="../../"><span class="brand-mark" aria-hidden="true">{:}</span> JSON:API Lens</a>
+          <p class="fine">
+            A free, browser-based JSON:API viewer, validator, and relationship explorer. Open source on
+            <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>.
+          </p>
+        </div>
+        <div>
+          <h3>Product</h3>
+          <ul>
+            <li><a href="../../viewer/">JSON:API viewer</a></li>
+            <li><a href="../jsonapi-validator/">JSON:API validator</a></li>
+            <li><a href="../jsonapi-relationships/">Relationships guide</a></li>
+            <li><a href="../jsonapi-vs-json/">JSON:API vs JSON</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="https://jsonapi.org/format/" rel="noopener">JSON:API specification</a></li>
+            <li><a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">Source code</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

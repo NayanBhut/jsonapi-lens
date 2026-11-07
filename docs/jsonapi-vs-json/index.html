@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON:API vs JSON: What's the Difference?</title>
+    <meta
+      name="description"
+      content="JSON is a data format. JSON:API is a specification for building APIs in JSON. Compare the media type, document structure, relationships, included resources, and when to use each."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-vs-json/" />
+    <link rel="icon" type="image/svg+xml" href="../../assets/favicon.svg" />
+    <meta name="theme-color" content="#070a10" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="JSON:API Lens" />
+    <meta property="og:url" content="https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-vs-json/" />
+    <meta property="og:title" content="JSON:API vs JSON: What's the Difference?" />
+    <meta
+      property="og:description"
+      content="JSON is a data format. JSON:API is a specification for building APIs in JSON. Compare structure, media types, relationships, and trade-offs."
+    />
+    <meta property="og:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JSON:API vs JSON: What's the Difference?" />
+    <meta
+      name="twitter:description"
+      content="JSON is a data format. JSON:API is a specification for building APIs in JSON. Compare structure, media types, relationships, and trade-offs."
+    />
+    <meta name="twitter:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+
+    <link rel="stylesheet" href="../../site.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://nayanbhut.github.io/jsonapi-lens/" },
+              { "@type": "ListItem", "position": 2, "name": "JSON:API vs JSON", "item": "https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-vs-json/" }
+            ]
+          },
+          {
+            "@type": "Article",
+            "headline": "JSON:API vs JSON: what's the difference?",
+            "description": "Compare JSON, the data format, with JSON:API, the specification for building APIs in JSON.",
+            "author": { "@type": "Organization", "name": "JSON:API Lens" },
+            "publisher": { "@type": "Organization", "name": "JSON:API Lens" },
+            "mainEntityOfPage": "https://nayanbhut.github.io/jsonapi-lens/docs/jsonapi-vs-json/"
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Is JSON:API the same as JSON?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. JSON is a general data format. JSON:API is a specification for building APIs in JSON, defining resource objects, relationships, compound documents, errors, pagination, and the application/vnd.api+json media type."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I use a normal JSON parser for JSON:API?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes, the syntax is ordinary JSON. But a parser only gives you the raw object. To use a JSON:API document you must also resolve type and id linkage against included resources and follow the specification's structure."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "When should I use JSON:API instead of plain JSON?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "JSON:API is a good fit when you want a consistent, documented API across teams, built-in relationship handling, compound documents, standard errors, and conventions for filtering and pagination. Plain JSON is simpler for small or internal endpoints."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="../../" aria-label="JSON:API Lens home">
+          <span class="brand-mark" aria-hidden="true">{:}</span>
+          JSON:API Lens
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="../../viewer/">Viewer</a>
+          <a href="../jsonapi-validator/">Validator</a>
+          <a href="../jsonapi-relationships/">Relationships</a>
+          <a href="../jsonapi-vs-json/">JSON:API vs JSON</a>
+          <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>
+          <a class="nav-cta" href="../../viewer/">Open viewer</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <div class="doc-hero">
+          <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <a href="../../">Home</a><span>/</span><span>Docs</span><span>/</span><span>JSON:API vs JSON</span>
+          </nav>
+          <span class="eyebrow">Explainer</span>
+          <h1>JSON:API vs JSON: what's the difference?</h1>
+          <p class="lead" style="max-width: 760px">
+            The names look similar, but they describe different things. <strong>JSON</strong> is a data format.
+            <strong>JSON:API</strong> is a specification for building APIs with that format. One is syntax; the other
+            is a set of conventions for resources, relationships, errors, and queries.
+          </p>
+        </div>
+
+        <div class="doc-layout">
+          <article class="doc-body">
+            <h2 id="json">What JSON is</h2>
+            <p>
+              JSON (JavaScript Object Notation) is a text format for structured data: objects, arrays, strings,
+              numbers, booleans, and <code>null</code>. It says nothing about APIs. You can use it for configuration
+              files, logs, message queues, or any other data interchange.
+            </p>
+            <pre><code>{
+  "id": 1,
+  "title": "JSON:API paints my bikeshed!",
+  "author": {
+    "id": 9,
+    "name": "Dan Gebhardt"
+  }
+}</code></pre>
+            <p>
+              The example above is plain JSON. It is perfectly valid, but every API that uses this style invents its
+              own conventions for errors, pagination, relationships, and identifiers.
+            </p>
+
+            <h2 id="jsonapi">What JSON:API is</h2>
+            <p>
+              JSON:API is a specification for APIs that use JSON. It defines a media type
+              (<code>application/vnd.api+json</code>), a document structure, resource objects, relationships,
+              compound documents, error objects, and query conventions such as <code>include</code>,
+              <code>fields</code>, <code>sort</code>, <code>page</code>, and <code>filter</code>.
+            </p>
+            <pre><code>{
+  "data": {
+    "type": "articles",
+    "id": "1",
+    "attributes": {
+      "title": "JSON:API paints my bikeshed!"
+    },
+    "relationships": {
+      "author": { "data": { "type": "people", "id": "9" } }
+    }
+  },
+  "included": [
+    {
+      "type": "people",
+      "id": "9",
+      "attributes": { "name": "Dan Gebhardt" }
+    }
+  ]
+}</code></pre>
+            <p>
+              The data is separated from its relationships. The article's author is a pointer to
+              <code>people:9</code>, and the person's attributes are in <code>included</code>. This is what allows a
+              server to return a graph of related resources without duplicating objects.
+            </p>
+
+            <h2 id="compare">Side-by-side comparison</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Aspect</th>
+                    <th scope="col">JSON</th>
+                    <th scope="col">JSON:API</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>What it is</td>
+                    <td>A data format</td>
+                    <td><strong>A specification for APIs</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Media type</td>
+                    <td><code>application/json</code></td>
+                    <td><code>application/vnd.api+json</code></td>
+                  </tr>
+                  <tr>
+                    <td>Top-level shape</td>
+                    <td>Anything</td>
+                    <td><code>data</code>, <code>errors</code>, or <code>meta</code></td>
+                  </tr>
+                  <tr>
+                    <td>Relationships</td>
+                    <td>Whatever the API chooses</td>
+                    <td><strong>Standard resource linkage</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Related objects</td>
+                    <td>Nested or repeated</td>
+                    <td><code>included</code> compound documents</td>
+                  </tr>
+                  <tr>
+                    <td>Errors</td>
+                    <td>Custom</td>
+                    <td>Standard <code>errors</code> array</td>
+                  </tr>
+                  <tr>
+                    <td>Pagination / filtering</td>
+                    <td>Custom</td>
+                    <td>Conventions such as <code>page</code>, <code>filter</code>, <code>sort</code></td>
+                  </tr>
+                  <tr>
+                    <td>Best for</td>
+                    <td>Small or internal payloads</td>
+                    <td><strong>Consistent, documented APIs</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h2 id="parser">Can a JSON parser read JSON:API?</h2>
+            <p>
+              Yes — syntactically, a JSON:API document is ordinary JSON, so any JSON parser can read it. What a parser
+              cannot do is interpret it. To display a JSON:API response you also need to:
+            </p>
+            <ul>
+              <li>separate primary <code>data</code> from <code>included</code>;</li>
+              <li>resolve relationship linkage by <code>type</code> and <code>id</code>;</li>
+              <li>detect cycles and missing targets;</li>
+              <li>understand <code>errors</code>, <code>links</code>, and <code>meta</code>.</li>
+            </ul>
+            <p>
+              That interpretation layer is exactly what a <a href="../jsonapi-viewer/">JSON:API viewer</a> provides.
+              A formatter shows the syntax; a viewer shows the graph.
+            </p>
+
+            <h2 id="when">When to use JSON:API</h2>
+            <p>JSON:API is a strong fit when:</p>
+            <ul>
+              <li>multiple teams or clients consume the same API and need shared conventions;</li>
+              <li>responses contain related resources that would otherwise be duplicated or require extra requests;</li>
+              <li>you want standard error objects, pagination, sorting, filtering, and sparse fieldsets;</li>
+              <li>you want clients and servers in different languages to agree on the contract.</li>
+            </ul>
+            <p>Plain JSON may be simpler when:</p>
+            <ul>
+              <li>the endpoint is small, internal, or short-lived;</li>
+              <li>the payload is a single object with no relationships;</li>
+              <li>you control every client and do not need a shared specification.</li>
+            </ul>
+            <p>
+              Neither choice is inherently better. JSON:API trades some up-front structure for consistency at scale.
+              The cost is that raw responses are harder to read by hand — which is why tooling matters.
+            </p>
+
+            <h2 id="faq">Frequently asked questions</h2>
+            <div class="faq">
+              <details open>
+                <summary>Is JSON:API the same as JSON?</summary>
+                <div class="faq-body">
+                  <p>
+                    No. JSON is a general data format. JSON:API is a specification for building APIs in JSON,
+                    defining resource objects, relationships, compound documents, errors, pagination, and the
+                    <code>application/vnd.api+json</code> media type.
+                  </p>
+                </div>
+              </details>
+              <details>
+                <summary>Can I use a normal JSON parser for JSON:API?</summary>
+                <div class="faq-body">
+                  <p>
+                    Yes, the syntax is ordinary JSON. But a parser only gives you the raw object. To use a JSON:API
+                    document you must also resolve type and id linkage against included resources and follow the
+                    specification's structure.
+                  </p>
+                </div>
+              </details>
+              <details>
+                <summary>When should I use JSON:API instead of plain JSON?</summary>
+                <div class="faq-body">
+                  <p>
+                    JSON:API is a good fit when you want a consistent, documented API across teams, built-in
+                    relationship handling, compound documents, standard errors, and conventions for filtering and
+                    pagination. Plain JSON is simpler for small or internal endpoints.
+                  </p>
+                </div>
+              </details>
+            </div>
+
+            <div class="cta" style="margin-top: 40px">
+              <div>
+                <h2>See the difference in a real document</h2>
+                <p>Load a JSON:API response and expand its relationships.</p>
+              </div>
+              <a class="btn btn-primary" href="../../viewer/">Open the viewer →</a>
+            </div>
+          </article>
+
+          <aside class="doc-aside">
+            <h3>On this page</h3>
+            <ul>
+              <li><a href="#json">What JSON is</a></li>
+              <li><a href="#jsonapi">What JSON:API is</a></li>
+              <li><a href="#compare">Comparison</a></li>
+              <li><a href="#parser">Parsers</a></li>
+              <li><a href="#when">When to use it</a></li>
+              <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <h3 style="margin-top: 20px">Related</h3>
+            <ul>
+              <li><a href="../jsonapi-viewer/">JSON:API viewer</a></li>
+              <li><a href="../jsonapi-validator/">JSON:API validator</a></li>
+              <li><a href="../jsonapi-relationships/">Relationships explained</a></li>
+            </ul>
+            <a class="btn btn-primary" href="../../viewer/">Open the viewer</a>
+          </aside>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>
+          <a class="brand" href="../../"><span class="brand-mark" aria-hidden="true">{:}</span> JSON:API Lens</a>
+          <p class="fine">
+            A free, browser-based JSON:API viewer, validator, and relationship explorer. Open source on
+            <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>.
+          </p>
+        </div>
+        <div>
+          <h3>Product</h3>
+          <ul>
+            <li><a href="../../viewer/">JSON:API viewer</a></li>
+            <li><a href="../jsonapi-validator/">JSON:API validator</a></li>
+            <li><a href="../jsonapi-relationships/">Relationships guide</a></li>
+            <li><a href="../jsonapi-vs-json/">JSON:API vs JSON</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="https://jsonapi.org/format/" rel="noopener">JSON:API specification</a></li>
+            <li><a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">Source code</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

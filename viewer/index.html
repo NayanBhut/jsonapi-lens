@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON:API Viewer — expand relationships and included resources</title>
+    <meta
+      name="description"
+      content="Open a JSON:API document and expand relationships and included resources recursively. Validate JSON:API 1.1, copy resolved plain JSON, and explore the relationship graph. Free and browser-based."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://nayanbhut.github.io/jsonapi-lens/viewer/" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <meta name="theme-color" content="#070a10" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JSON:API Lens" />
+    <meta property="og:url" content="https://nayanbhut.github.io/jsonapi-lens/viewer/" />
+    <meta property="og:title" content="JSON:API Viewer — expand relationships and included resources" />
+    <meta
+      property="og:description"
+      content="Expand JSON:API relationships recursively, validate the document against JSON:API 1.1, and copy resolved plain JSON. Free and browser-based."
+    />
+    <meta property="og:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JSON:API Viewer — expand relationships and included resources" />
+    <meta
+      name="twitter:description"
+      content="Expand JSON:API relationships recursively, validate the document against JSON:API 1.1, and copy resolved plain JSON."
+    />
+    <meta name="twitter:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span>{</span><i>:</i><span>}</span></div>
+        <div class="brand-text">
+          <h1>JSON:API Lens</h1>
+          <p>Deep relationships · included resources · spec validation</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <label class="select-wrap" title="Load an example document">
+          <select id="example-select" aria-label="Load an example document">
+            <option value="">Load example…</option>
+            <option value="deep">Deep relations (valid)</option>
+            <option value="violations">Spec violations</option>
+            <option value="errors">Error document</option>
+            <option value="minimal">Minimal resource</option>
+          </select>
+        </label>
+        <a class="icon-btn spec-link" href="../">Home</a>
+        <a class="icon-btn spec-link" href="https://jsonapi.org/format/" target="_blank" rel="noreferrer">Spec ↗</a>
+        <button class="icon-btn" id="theme-toggle" type="button" title="Toggle theme" aria-label="Toggle theme">☾</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="pane input-pane" id="input-pane" aria-label="JSON:API document input">
+        <div class="pane-head">
+          <div class="pane-title"><span class="pulse-dot"></span> Document</div>
+          <div class="pane-tools">
+            <input type="file" id="file-input" accept=".json,application/json" hidden />
+            <button class="ghost-btn" id="url-btn" type="button" title="Fetch a JSON:API document from a URL">URL</button>
+            <button class="ghost-btn" id="upload-btn" type="button" title="Open a .json file">Upload</button>
+            <button class="ghost-btn" id="format-btn" type="button" title="Pretty-print the JSON">Format</button>
+            <button class="ghost-btn" id="clear-btn" type="button" title="Clear the editor">Clear</button>
+          </div>
+        </div>
+        <form class="url-bar" id="url-bar" hidden>
+          <input
+            id="url-input"
+            type="url"
+            inputmode="url"
+            placeholder="https://api.example.com/articles?include=author"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="JSON:API document URL"
+          />
+          <button class="ghost-btn url-load" id="url-load" type="submit">Fetch</button>
+          <button class="icon-btn url-close" id="url-close" type="button" title="Close" aria-label="Close URL bar">×</button>
+        </form>
+        <div class="editor-wrap" id="dropzone">
+          <textarea
+            id="editor"
+            spellcheck="false"
+            autocomplete="off"
+            autocapitalize="off"
+            aria-label="JSON:API document"
+            placeholder='Paste a JSON:API document here…'
+          ></textarea>
+          <div class="drop-overlay" id="drop-overlay" aria-hidden="true">
+            <div class="drop-inner">
+              <div class="drop-mark">{ }</div>
+              <strong>Drop your JSON file</strong>
+              <span>It never leaves this page</span>
+            </div>
+          </div>
+        </div>
+        <div class="statusbar">
+          <span class="status-dot" id="parse-dot"></span>
+          <span id="parse-status" class="status-text">Waiting for input</span>
+          <span class="status-meta" id="input-meta"></span>
+        </div>
+      </section>
+
+      <section class="pane output-pane" aria-label="Parsed document">
+        <div class="summary" id="summary"></div>
+        <nav class="tabs" id="tabs" role="tablist" aria-label="Views">
+          <button class="tab is-active" data-tab="tree" type="button" role="tab">Tree</button>
+          <button class="tab" data-tab="graph" type="button" role="tab">Graph</button>
+          <button class="tab" data-tab="json" type="button" role="tab">JSON</button>
+          <button class="tab tab-issues" data-tab="issues" type="button" role="tab">
+            Issues <span class="tab-count" id="issues-count">0</span>
+          </button>
+        </nav>
+        <div class="view" id="view"></div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="../core.js"></script>
+    <script src="../samples.js"></script>
+    <script src="../lib.js"></script>
+    <script src="../tree.js"></script>
+    <script src="../graph.js"></script>
+    <script src="../app.js"></script>
+  </body>
+</html>
