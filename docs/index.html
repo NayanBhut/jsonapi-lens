@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON:API Guides — Viewer, Validator &amp; Relationships</title>
+    <meta
+      name="description"
+      content="Short, practical guides to JSON:API: inspect compound documents, validate document structure, understand relationships and included resources, and compare JSON:API with plain JSON."
+    />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <link rel="canonical" href="https://nayanbhut.github.io/jsonapi-lens/docs/" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+    <meta name="theme-color" content="#070a10" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JSON:API Lens" />
+    <meta property="og:url" content="https://nayanbhut.github.io/jsonapi-lens/docs/" />
+    <meta property="og:title" content="JSON:API Guides — Viewer, Validator &amp; Relationships" />
+    <meta
+      property="og:description"
+      content="Short, practical guides to JSON:API: compound documents, validation, relationships, and how JSON:API differs from plain JSON."
+    />
+    <meta property="og:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="JSON:API Guides — Viewer, Validator &amp; Relationships" />
+    <meta
+      name="twitter:description"
+      content="Short, practical guides to JSON:API: compound documents, validation, relationships, and how JSON:API differs from plain JSON."
+    />
+    <meta name="twitter:image" content="https://nayanbhut.github.io/jsonapi-lens/assets/og-image.png" />
+
+    <link rel="stylesheet" href="../site.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://nayanbhut.github.io/jsonapi-lens/" },
+              { "@type": "ListItem", "position": 2, "name": "Guides", "item": "https://nayanbhut.github.io/jsonapi-lens/docs/" }
+            ]
+          },
+          {
+            "@type": "CollectionPage",
+            "name": "JSON:API guides",
+            "url": "https://nayanbhut.github.io/jsonapi-lens/docs/",
+            "description": "Practical guides to JSON:API viewers, validation, relationships, and the difference between JSON:API and JSON.",
+            "isPartOf": { "@type": "WebSite", "name": "JSON:API Lens", "url": "https://nayanbhut.github.io/jsonapi-lens/" }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="brand" href="../" aria-label="JSON:API Lens home">
+          <span class="brand-mark" aria-hidden="true">{:}</span>
+          JSON:API Lens
+        </a>
+        <nav class="site-nav" aria-label="Main navigation">
+          <a href="../viewer/">Viewer</a>
+          <a href="jsonapi-validator/">Validator</a>
+          <a href="jsonapi-relationships/">Relationships</a>
+          <a href="jsonapi-vs-json/">JSON:API vs JSON</a>
+          <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>
+          <a class="nav-cta" href="../viewer/">Open viewer</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="wrap">
+        <div class="doc-hero">
+          <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <a href="../">Home</a><span>/</span><span>Guides</span>
+          </nav>
+          <span class="eyebrow">Guides</span>
+          <h1>JSON:API guides</h1>
+          <p class="lead" style="max-width: 760px">
+            Four short guides covering the parts of JSON:API that are hardest to read by hand: compound documents,
+            resource linkage, structural validation, and the difference between JSON:API and plain JSON. Every guide
+            ends with an example you can open in the viewer.
+          </p>
+        </div>
+
+        <div class="grid" style="margin-top: 8px">
+          <a class="card" href="jsonapi-viewer/" style="text-decoration: none">
+            <span class="eyebrow">Guide</span>
+            <h2 style="margin-top: 8px">JSON:API viewer</h2>
+            <p class="muted">
+              How to open a response, expand relationships and included resources recursively, and read a compound
+              document without losing track of type and id linkage.
+            </p>
+            <p><strong>Read the viewer guide →</strong></p>
+          </a>
+
+          <a class="card" href="jsonapi-validator/" style="text-decoration: none">
+            <span class="eyebrow">Guide</span>
+            <h2 style="margin-top: 8px">JSON:API validator</h2>
+            <p class="muted">
+              The structural rules a document has to satisfy: resource objects, string ids, relationship shape,
+              duplicate detection, full linkage, and error documents.
+            </p>
+            <p><strong>Read the validator guide →</strong></p>
+          </a>
+
+          <a class="card" href="jsonapi-relationships/" style="text-decoration: none">
+            <span class="eyebrow">Guide</span>
+            <h2 style="margin-top: 8px">Relationships explained</h2>
+            <p class="muted">
+              Resource linkage, compound documents, sparse fieldsets, full linkage, sparse linkage, and how cycles
+              appear in real payloads — with examples.
+            </p>
+            <p><strong>Read the relationships guide →</strong></p>
+          </a>
+
+          <a class="card" href="jsonapi-vs-json/" style="text-decoration: none">
+            <span class="eyebrow">Guide</span>
+            <h2 style="margin-top: 8px">JSON:API vs JSON</h2>
+            <p class="muted">
+              JSON is a data format. JSON:API is a specification for building APIs in JSON. Compare structure, media
+              types, relationships, and when each one is the right choice.
+            </p>
+            <p><strong>Read the comparison →</strong></p>
+          </a>
+        </div>
+
+        <div class="cta" style="margin-top: 40px">
+          <div>
+            <h2>Skip the reading and open a document</h2>
+            <p>Paste a response or load the built-in example. Everything runs in your browser.</p>
+          </div>
+          <a class="btn btn-primary" href="../viewer/">Open the viewer →</a>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div>
+          <a class="brand" href="../"><span class="brand-mark" aria-hidden="true">{:}</span> JSON:API Lens</a>
+          <p class="fine">
+            A free, browser-based JSON:API viewer, validator, and relationship explorer. Open source on
+            <a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">GitHub</a>.
+          </p>
+        </div>
+        <div>
+          <h3>Product</h3>
+          <ul>
+            <li><a href="../viewer/">JSON:API viewer</a></li>
+            <li><a href="jsonapi-validator/">JSON:API validator</a></li>
+            <li><a href="jsonapi-relationships/">Relationships guide</a></li>
+            <li><a href="jsonapi-vs-json/">JSON:API vs JSON</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Resources</h3>
+          <ul>
+            <li><a href="https://jsonapi.org/format/" rel="noopener">JSON:API specification</a></li>
+            <li><a href="https://github.com/NayanBhut/jsonapi-lens" rel="noopener">Source code</a></li>
+          </ul>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
