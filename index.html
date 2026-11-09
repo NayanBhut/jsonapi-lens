@@ -281,9 +281,10 @@
               <span class="eyebrow">Why a dedicated tool</span>
               <h2>Why not just a JSON formatter?</h2>
               <p class="lead">
-                JSON:API moves relationship data out of the resource and into resource linkage. To understand a
-                response you have to resolve <code>type</code> and <code>id</code> pairs against the
-                <code>included</code> array — often several hops deep.
+                JSON:API moves relationship data out of the resource and into resource linkage. Most JSON API viewers
+                stop after one level of expansion; to understand a real response you have to resolve
+                <code>type</code> and <code>id</code> pairs against the <code>included</code> array — often several
+                hops deep.
               </p>
               <p class="muted">
                 A formatter cannot tell you that <code>people:9</code> is the author, that the author's employer is
