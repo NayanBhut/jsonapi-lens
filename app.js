@@ -174,6 +174,7 @@
     state.doc = parsed.value;
     state.model = core.buildModel(parsed.value);
     state.issues = core.validate(parsed.value);
+    if (state.model.kind === "plain" && state.tab === "graph") state.tab = "tree";
     if (options && options.resetExpansion) state.expanded = new Set();
     persistInput(state.raw);
     updateStatus();
@@ -228,7 +229,18 @@
       var parts = [];
       if (lines) parts.push(lines + " lines");
       if (bytes) parts.push(Lens.formatBytes(bytes));
-      parts.push(state.model.stats.primaryCount + state.model.stats.includedCount + " resources");
+      if (state.model.kind === "plain") {
+        if (Array.isArray(state.doc)) {
+          parts.push(state.doc.length + (state.doc.length === 1 ? " item" : " items"));
+        } else if (isObject(state.doc)) {
+          var keyCount = Object.keys(state.doc).length;
+          parts.push(keyCount + (keyCount === 1 ? " key" : " keys"));
+        } else {
+          parts.push("1 value");
+        }
+      } else {
+        parts.push(state.model.stats.primaryCount + state.model.stats.includedCount + " resources");
+      }
       ui.inputMeta.textContent = parts.join(" · ");
     } else {
       ui.statusText.textContent = "Waiting for input";
@@ -290,6 +302,13 @@
     var warnings = countSeverity("warning");
     var infos = countSeverity("info");
     var model = state.model;
+
+    if (model.kind === "plain") {
+      var plainChip = makeChip("is-info", "This document is valid JSON but not JSON:API, so it is not validated.");
+      plainChip.appendChild(el("b", {}, "Plain JSON"));
+      summary.appendChild(plainChip);
+      return;
+    }
 
     var statusKind = errors ? "is-bad" : warnings ? "is-warn" : "is-ok";
     var statusText = errors
@@ -397,10 +416,15 @@
 
   function renderTabs() {
     if (!ui.tabs) return;
+    var plain = !!state.model && state.model.kind === "plain";
     Array.prototype.forEach.call(ui.tabs.querySelectorAll(".tab"), function (tab) {
       var active = tab.dataset.tab === state.tab;
+      var disabled = plain && tab.dataset.tab === "graph";
       tab.classList.toggle("is-active", active);
       tab.setAttribute("aria-selected", active ? "true" : "false");
+      tab.disabled = disabled;
+      tab.setAttribute("aria-disabled", disabled ? "true" : "false");
+      tab.title = disabled ? "Graph is only available for JSON:API documents" : "";
     });
 
     var errors = countSeverity("error");
@@ -418,6 +442,7 @@
   }
 
   function switchTab(tab) {
+    if (tab === "graph" && state.model && state.model.kind === "plain") return;
     if (tab === state.tab) {
       renderView();
       return;
@@ -677,6 +702,20 @@
     var errors = countSeverity("error");
     var warnings = countSeverity("warning");
     var infos = countSeverity("info");
+
+    if (state.model && state.model.kind === "plain") {
+      var plain = el("div", { class: "empty" });
+      plain.appendChild(el("div", { class: "empty-mark" }, "✓"));
+      plain.appendChild(el("h2", {}, "No JSON:API rules apply"));
+      plain.appendChild(
+        el(
+          "p",
+          {},
+          "This is a plain JSON document, so JSON:API structural rules are not checked. Paste a JSON:API document to run the validator."
+        )
+      );
+      return plain;
+    }
 
     if (!state.issues.length) {
       var clean = el("div", { class: "empty" });
