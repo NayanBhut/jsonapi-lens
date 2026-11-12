@@ -115,6 +115,21 @@ test("errors and meta documents keep their kinds", function () {
 });
 ```
 
+### Step 1b: Adjust the one pre-existing test the new rule invalidates
+
+`test("detects included without data")` currently uses `{ included: [...] }` and asserts `INCLUDED_WITHOUT_DATA` plus `EMPTY_DOCUMENT`. Under the new rule that document is plain, so `validate()` correctly returns `[]`, and `EMPTY_DOCUMENT` is unreachable for any JSON:API document (it must declare `data`, `errors` or `meta`). Rewrite that test to keep its intent:
+
+```js
+test("detects included without data", function () {
+  var doc = { errors: [], included: [{ type: "people", id: "1" }] };
+  // ...keep the existing assertions against `doc`...
+  assert.ok(codes.includes("INCLUDED_WITHOUT_DATA"));
+  assert.deepStrictEqual(core.validate({ included: [{ type: "people", id: "1" }] }), [], "included-only documents are plain JSON");
+});
+```
+
+Leave the now-unreachable `EMPTY_DOCUMENT` rule in `core.js`; removing it is out of scope.
+
 ### Step 2: Run the tests and watch them fail
 
 Run: `node tests/core.test.js`
