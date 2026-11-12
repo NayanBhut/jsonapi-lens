@@ -10,6 +10,8 @@
 
   var INCLUDED_RENDER_LIMIT = 200;
   var VALUE_PREVIEW_LIMIT = 200000;
+  var PLAIN_DEPTH_LIMIT = 8;
+  var PLAIN_CHILD_LIMIT = 200;
 
   function shortPath(labels) {
     if (labels.length <= 5) return labels.join(" › ");
@@ -39,6 +41,11 @@
 
     if (!model || model.kind === "invalid") {
       fragment.appendChild(renderInvalid());
+      return fragment;
+    }
+
+    if (model.kind === "plain") {
+      fragment.appendChild(renderPlain());
       return fragment;
     }
 
@@ -832,6 +839,106 @@
     return section;
   }
 
+  // -------------------------------------------------------------------------
+  // Plain JSON (not a JSON:API document)
+  // -------------------------------------------------------------------------
+
+  function plainLabel(value) {
+    var isArray = Array.isArray(value);
+    if (isArray) return "array · " + value.length + " items";
+    return "object · " + Object.keys(value).length + " keys";
+  }
+
+  // `depth` is the nesting level of `value`. At the limit the subtree is shown
+  // as a single pretty-printed <pre> so a pathological document still terminates.
+  function renderPlainNode(value, depth) {
+    if (depth >= PLAIN_DEPTH_LIMIT) return renderValue(value);
+    if (!Array.isArray(value) && !isObject(value)) return renderValue(value);
+
+    var isArray = Array.isArray(value);
+    var keys = isArray
+      ? value.map(function (_, index) {
+          return index;
+        })
+      : Object.keys(value);
+
+    var details = el("details", { class: "value-details" });
+    details.appendChild(el("summary", {}, plainLabel(value)));
+
+    var rows = el("div", { class: "attrs" });
+    var more = null;
+    var rendered = 0;
+
+    function appendBatch() {
+      var end = Math.min(keys.length, rendered + PLAIN_CHILD_LIMIT);
+      for (var i = rendered; i < end; i += 1) {
+        var key = keys[i];
+        var row = el("div", { class: "attr" });
+        row.appendChild(
+          el("span", { class: "attr-name", title: String(key) }, isArray ? "[" + key + "]" : String(key))
+        );
+        var cell = el("div", { class: "attr-value" });
+        cell.appendChild(renderPlainNode(value[key], depth + 1));
+        row.appendChild(cell);
+        rows.appendChild(row);
+      }
+      rendered = end;
+      if (more) rows.appendChild(more);
+    }
+
+    if (keys.length > PLAIN_CHILD_LIMIT) {
+      more = el("button", { class: "tool-btn", type: "button" }, "Show " + PLAIN_CHILD_LIMIT + " more");
+      more.addEventListener("click", function () {
+        appendBatch();
+        var remaining = keys.length - rendered;
+        if (remaining > 0) {
+          more.textContent = "Show " + Math.min(PLAIN_CHILD_LIMIT, remaining) + " more";
+        } else {
+          more.remove();
+        }
+      });
+    }
+
+    appendBatch();
+    details.appendChild(rows);
+    return details;
+  }
+
+  function renderPlain() {
+    var state = Lens.state;
+    var section = el("section", { class: "section" });
+
+    section.appendChild(
+      el(
+        "div",
+        { class: "notice info" },
+        el("span", { class: "notice-icon" }, "i"),
+        el(
+          "div",
+          {},
+          el("strong", {}, "Plain JSON"),
+          el("div", {}, "Not a JSON:API document. Showing a generic tree.")
+        )
+      )
+    );
+
+    var root = el("div", {});
+    if (Array.isArray(state.doc) || isObject(state.doc)) {
+      root.appendChild(renderPlainNode(state.doc, 0));
+    } else {
+      var row = el("div", { class: "attr" });
+      row.appendChild(el("span", { class: "attr-name" }, "root"));
+      var cell = el("div", { class: "attr-value" });
+      cell.appendChild(renderValue(state.doc));
+      row.appendChild(cell);
+      var attrs = el("div", { class: "attrs" });
+      attrs.appendChild(row);
+      root.appendChild(attrs);
+    }
+    section.appendChild(root);
+    return section;
+  }
+
   function renderInvalid() {
     var section = el("section", { class: "section" });
     section.appendChild(
@@ -846,7 +953,7 @@
           el(
             "div",
             {},
-            "The top-level value must be an object containing at least one of data, errors or meta. Open the Issues tab for the structural details."
+            "This document declares data, errors or meta but is not a structurally valid JSON:API document. Open the Issues tab for the details."
           )
         )
       )
