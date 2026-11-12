@@ -12,6 +12,15 @@
   var VALUE_PREVIEW_LIMIT = 200000;
   var PLAIN_DEPTH_LIMIT = 8;
   var PLAIN_CHILD_LIMIT = 200;
+  // Hard ceiling on DOM rows built eagerly for a plain document. Branching
+  // documents (e.g. 200 keys per level, several levels deep) would otherwise
+  // create millions of elements and freeze or crash the tab even though the
+  // JSON text itself is small enough to pass the input size check.
+  var PLAIN_ROW_BUDGET = 20000;
+
+  // Working state for the current plain render; reset by renderPlain().
+  var plainRows = 0;
+  var plainCapped = false;
 
   function shortPath(labels) {
     if (labels.length <= 5) return labels.join(" › ");
@@ -850,9 +859,25 @@
     return "object · " + length + (length === 1 ? " key" : " keys");
   }
 
+  // Cheap node used once the eager-render budget is gone: no recursion and no
+  // JSON.stringify of the subtree, so an exhausted budget cannot blow up either.
+  function plainPlaceholder(value) {
+    var label = Array.isArray(value) || isObject(value) ? plainLabel(value) : "value";
+    var wrap = el("div", { class: "value-details value-deep" });
+    wrap.appendChild(el("div", { class: "value-deep-head" }, label));
+    wrap.appendChild(
+      el("div", { class: "value-deep-note" }, "Preview cap reached — open the JSON tab to inspect this value.")
+    );
+    plainCapped = true;
+    return wrap;
+  }
+
   // `depth` is the nesting level of `value`. At the limit the subtree is shown
   // as a single pretty-printed <pre> so a pathological document still terminates.
   function renderPlainNode(value, depth) {
+    if ((Array.isArray(value) || isObject(value)) && plainRows >= PLAIN_ROW_BUDGET) {
+      return plainPlaceholder(value);
+    }
     if (depth >= PLAIN_DEPTH_LIMIT) return renderValue(value);
     if (!Array.isArray(value) && !isObject(value)) return renderValue(value);
 
@@ -871,29 +896,46 @@
     var rendered = 0;
 
     function appendBatch() {
-      var end = Math.min(keys.length, rendered + PLAIN_CHILD_LIMIT);
-      for (var i = rendered; i < end; i += 1) {
-        var key = keys[i];
+      var built = 0;
+      while (rendered < keys.length && built < PLAIN_CHILD_LIMIT) {
+        if (plainRows >= PLAIN_ROW_BUDGET) {
+          plainCapped = true;
+          break;
+        }
+        var key = keys[rendered];
         var row = el("div", { class: "attr" });
         row.appendChild(
           el("span", { class: "attr-name", title: String(key) }, isArray ? "[" + key + "]" : String(key))
         );
         var cell = el("div", { class: "attr-value" });
+        plainRows += 1;
         cell.appendChild(renderPlainNode(value[key], depth + 1));
         row.appendChild(cell);
         rows.appendChild(row);
+        rendered += 1;
+        built += 1;
       }
-      rendered = end;
       if (more) rows.appendChild(more);
     }
 
     if (keys.length > PLAIN_CHILD_LIMIT) {
       more = el("button", { class: "tool-btn", type: "button" }, "Show " + PLAIN_CHILD_LIMIT + " more");
       more.addEventListener("click", function () {
+        if (plainRows >= PLAIN_ROW_BUDGET) {
+          plainCapped = true;
+          more.textContent = "Preview cap reached — use the JSON tab";
+          more.disabled = true;
+          return;
+        }
         appendBatch();
         var remaining = keys.length - rendered;
         if (remaining > 0) {
           more.textContent = "Show " + Math.min(PLAIN_CHILD_LIMIT, remaining) + " more";
+          if (plainRows >= PLAIN_ROW_BUDGET) {
+            plainCapped = true;
+            more.textContent = "Preview cap reached — use the JSON tab";
+            more.disabled = true;
+          }
         } else {
           more.remove();
         }
@@ -908,6 +950,9 @@
   function renderPlain() {
     var state = Lens.state;
     var section = el("section", { class: "section" });
+
+    plainRows = 0;
+    plainCapped = false;
 
     section.appendChild(
       el(
@@ -937,6 +982,22 @@
       root.appendChild(attrs);
     }
     section.appendChild(root);
+
+    if (plainCapped) {
+      section.appendChild(
+        el(
+          "div",
+          { class: "included-capped" },
+          el(
+            "span",
+            {},
+            "Preview limited to " +
+              PLAIN_ROW_BUDGET.toLocaleString() +
+              " rows to keep the page responsive. Open the JSON tab for the complete document."
+          )
+        )
+      );
+    }
     return section;
   }
 
