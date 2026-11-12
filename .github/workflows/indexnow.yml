@@ -1,0 +1,35 @@
+name: IndexNow
+
+# Ping IndexNow (Bing, Yandex, Seznam, Naver) whenever the site changes.
+# The key file is served from the site root: /jsonapi-lens/<key>.txt
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for the GitHub Pages build
+        run: sleep 90
+
+      - name: Submit every sitemap URL
+        run: |
+          set -euo pipefail
+          KEY="11f72225b442456e8aa611052f1696ae"
+          HOST="nayanbhut.github.io"
+          KEY_LOCATION="https://${HOST}/jsonapi-lens/${KEY}.txt"
+          URLS=$(grep -o '<loc>[^<]*</loc>' sitemap.xml \
+            | sed 's/<[^>]*>//g' \
+            | python3 -c 'import json,sys; print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))')
+          echo "Submitting: $URLS"
+          curl -sS -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d "{\"host\":\"${HOST}\",\"key\":\"${KEY}\",\"keyLocation\":\"${KEY_LOCATION}\",\"urlList\":${URLS}}" \
+            -w "\nIndexNow HTTP %{http_code}\n"
