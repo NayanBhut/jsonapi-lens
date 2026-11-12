@@ -2,6 +2,8 @@
 
 A dependency-free, browser-based JSON:API viewer, validator, and relationship explorer focused on **deep relationships**. Unlike viewers that stop after one level of `included` expansion, Lens resolves nested relationships recursively, detects cycles, and shows exactly which linkage targets are missing from the document.
 
+The viewer also opens ordinary JSON as a plain tree — JSON:API documents get relationship expansion and validation, everything else gets a readable tree.
+
 Live site: **https://nayanbhut.github.io/jsonapi-lens/**
 
 ![JSON:API Lens showing recursively expanded relationships](assets/screenshot-tree.png)
