@@ -219,6 +219,29 @@
         id: "1",
         attributes: { title: "Hello, JSON:API" }
       }
+    },
+
+    // Not a JSON:API document — demonstrates the plain-JSON fallback tree.
+    plain: {
+      name: "release-checklist",
+      version: "2.4.0",
+      stable: true,
+      downloads: { weekly: 125430, monthly: 512090 },
+      tags: ["stable", "lts"],
+      maintainers: [
+        { handle: "ada", role: "lead", commits: 812 },
+        { handle: "grace", role: "reviewer", commits: 354 }
+      ],
+      mirror: {
+        region: "eu-west-1",
+        healthy: true,
+        latencyMs: 42,
+        replicas: [
+          { id: "r1", status: "up" },
+          { id: "r2", status: "up" },
+          { id: "r3", status: "degraded" }
+        ]
+      }
     }
   };
 })();

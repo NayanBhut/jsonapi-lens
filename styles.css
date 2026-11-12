@@ -712,6 +712,16 @@ html[data-theme="light"] .chip.is-info {
   color: var(--text-soft);
 }
 
+.tab:disabled {
+  color: var(--muted);
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tab:disabled:hover {
+  color: var(--muted);
+}
+
 .tab.is-active {
   color: var(--text);
 }
@@ -846,6 +856,17 @@ html[data-theme="light"] .tree-toolbar {
   border-color: var(--border-strong);
   background: var(--surface-2);
   color: var(--text);
+}
+
+.tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tool-btn:disabled:hover {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--muted);
 }
 
 .tool-btn.primary {

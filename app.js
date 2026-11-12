@@ -18,8 +18,6 @@
   // Above this size, skip pretty-printing (it roughly doubles the string and
   // can take tens of seconds) and show the original text instead.
   var JSON_PRETTY_LIMIT = 8 * 1024 * 1024;
-  // Individual attribute values larger than this are summarized, not dumped.
-  var VALUE_PREVIEW_LIMIT = 200000;
 
   var state = (Lens.state = {
     raw: "",
@@ -933,6 +931,11 @@
       return entry.key === key;
     });
     if (includedIndex >= 200) state.showAllIncluded = true;
+    // Same treatment for primary resources hidden behind the render cap.
+    var primaryIndex = state.model.primary.findIndex(function (entry) {
+      return entry.key === key;
+    });
+    if (primaryIndex >= state.primaryRenderCount) state.primaryRenderCount = primaryIndex + 200;
     Lens.writeStore(STORE_TAB, "tree");
     renderTabs();
     renderView();
@@ -1020,6 +1023,14 @@
 
   function readFile(file) {
     if (!file) return;
+    // Reject before reading: FileReader would pull the whole file into memory
+    // just to refuse it afterwards.
+    if (file.size > MAX_INPUT_CHARS) {
+      Lens.toast(
+        "That file is " + Lens.formatBytes(file.size) + " — the viewer accepts up to " + Lens.formatBytes(MAX_INPUT_CHARS)
+      );
+      return;
+    }
     var reader = new FileReader();
     reader.onload = function () {
       var text = String(reader.result || "");
