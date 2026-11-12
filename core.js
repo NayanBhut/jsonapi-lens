@@ -321,15 +321,9 @@
       }
     });
 
-    if (!hasData && !hasErrors && !hasMeta) {
-      add(
-        "error",
-        "EMPTY_DOCUMENT",
-        "Document has no primary content",
-        "A JSON:API document MUST contain at least one of data, errors or meta.",
-        ""
-      );
-    }
+    // Note: the EMPTY_DOCUMENT rule (a document with none of data, errors or
+    // meta) is intentionally not implemented here — such documents are
+    // classified as plain JSON by isJsonApiDocument above and never validated.
 
     if (hasData && hasErrors) {
       add(
@@ -596,7 +590,7 @@
               relPointer
             );
           }
-          validateRelationship(resource.relationships[name], relPointer, add, resource);
+          validateRelationship(resource.relationships[name], relPointer, add);
         });
       }
     }
@@ -608,7 +602,7 @@
     }
   }
 
-  function validateRelationship(rel, pointer, add, owner) {
+  function validateRelationship(rel, pointer, add) {
     if (!isObject(rel)) {
       add("error", "RELATIONSHIP_TYPE", "Relationship must be an object", "A relationship must be a JSON object.", pointer);
       return;
@@ -644,10 +638,10 @@
         // Valid: empty to-one relationship.
       } else if (Array.isArray(rel.data)) {
         rel.data.forEach(function (identifier, index) {
-          validateIdentifier(identifier, pointer + "/data/" + index, add, owner);
+          validateIdentifier(identifier, pointer + "/data/" + index, add);
         });
       } else if (isObject(rel.data)) {
-        validateIdentifier(rel.data, pointer + "/data", add, owner);
+        validateIdentifier(rel.data, pointer + "/data", add);
       } else {
         add(
           "error",
