@@ -188,12 +188,12 @@ test("detects duplicate included resources", function () {
 });
 
 test("detects included without data", function () {
-  var doc = { included: [{ type: "people", id: "1" }] };
+  var doc = { errors: [], included: [{ type: "people", id: "1" }] };
   var codes = core.validate(doc).map(function (issue) {
     return issue.code;
   });
   assert.ok(codes.includes("INCLUDED_WITHOUT_DATA"));
-  assert.ok(codes.includes("EMPTY_DOCUMENT"));
+  assert.deepStrictEqual(core.validate({ included: [{ type: "people", id: "1" }] }), [], "included-only documents are plain JSON");
 });
 
 test("detects numeric ids", function () {
@@ -342,6 +342,48 @@ test("handles malformed structures without throwing", function () {
       core.buildModel(doc);
     });
   });
+});
+
+test("classifies non-JSON:API objects as plain", function () {
+  assert.strictEqual(core.buildModel({ users: [{ id: 1 }] }).kind, "plain");
+  assert.strictEqual(core.buildModel({ jsonapi: { version: "1.1" } }).kind, "plain");
+});
+
+test("classifies top-level arrays as plain", function () {
+  assert.strictEqual(core.buildModel([1, 2, 3]).kind, "plain");
+  assert.strictEqual(core.buildModel([]).kind, "plain");
+});
+
+test("classifies primitives as plain", function () {
+  [null, "text", 42, true].forEach(function (value) {
+    assert.strictEqual(core.buildModel(value).kind, "plain");
+  });
+});
+
+test("emits no JSON:API issues for plain documents", function () {
+  [{ users: [] }, { jsonapi: { version: "1.1" } }, [1, 2], "text", 42, true, null].forEach(function (doc) {
+    assert.deepStrictEqual(core.validate(doc), []);
+  });
+});
+
+test("plain models stay empty", function () {
+  var model = core.buildModel({ users: [{ id: 1 }] });
+  assert.strictEqual(model.primary.length, 0);
+  assert.strictEqual(model.included.length, 0);
+  assert.strictEqual(model.stats.primaryCount, 0);
+});
+
+test("declaring data still makes a document JSON:API", function () {
+  assert.strictEqual(core.buildModel({ data: 12 }).kind, "invalid");
+  assert.ok(core.validate({ data: 12 }).length > 0);
+  assert.strictEqual(core.buildModel({ data: null }).kind, "null");
+  assert.strictEqual(core.buildModel({ data: { type: "articles", id: "1" } }).kind, "resource");
+  assert.strictEqual(core.buildModel({ data: [] }).kind, "collection");
+});
+
+test("errors and meta documents keep their kinds", function () {
+  assert.strictEqual(core.buildModel({ errors: [] }).kind, "errors");
+  assert.strictEqual(core.buildModel({ meta: {} }).kind, "meta");
 });
 
 var failed = results.filter(function (result) {

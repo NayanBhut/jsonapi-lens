@@ -29,6 +29,12 @@
     return Object.prototype.hasOwnProperty.call(object, key);
   }
 
+  // A document is JSON:API when it declares one of the three primary members.
+  // Everything else is ordinary JSON and is rendered, not validated.
+  function isJsonApiDocument(doc) {
+    return isObject(doc) && (hasOwn(doc, "data") || hasOwn(doc, "errors") || hasOwn(doc, "meta"));
+  }
+
   /**
    * Stable identity for a resource or resource identifier.
    * Supports both `id` (persisted) and `lid` (local id, JSON:API 1.1).
@@ -294,14 +300,7 @@
       issues.push(makeIssue(severity, code, title, message, pointer));
     }
 
-    if (!isObject(doc)) {
-      add(
-        "error",
-        "DOCUMENT_TYPE",
-        "Document must be a JSON object",
-        "A JSON:API document is a JSON object containing at least one of data, errors or meta.",
-        ""
-      );
+    if (!isJsonApiDocument(doc)) {
       return issues;
     }
 
@@ -904,7 +903,10 @@
       types: [],
     };
 
-    if (!isObject(doc)) return model;
+    if (!isJsonApiDocument(doc)) {
+      model.kind = "plain";
+      return model;
+    }
 
     // Determine document shape ------------------------------------------------
     if (hasOwn(doc, "data")) {
@@ -916,6 +918,10 @@
       model.kind = "errors";
     } else if (isObject(doc.meta)) {
       model.kind = "meta";
+    } else {
+      // `errors` or `meta` declared with the wrong type: still JSON:API, but
+      // structurally invalid. `plain` must never be reachable from here.
+      model.kind = "invalid";
     }
 
     var entriesByKey = model.byKey;
