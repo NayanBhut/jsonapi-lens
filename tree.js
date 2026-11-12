@@ -845,8 +845,9 @@
 
   function plainLabel(value) {
     var isArray = Array.isArray(value);
-    if (isArray) return "array · " + value.length + " items";
-    return "object · " + Object.keys(value).length + " keys";
+    var length = isArray ? value.length : Object.keys(value).length;
+    if (isArray) return "array · " + length + (length === 1 ? " item" : " items");
+    return "object · " + length + (length === 1 ? " key" : " keys");
   }
 
   // `depth` is the nesting level of `value`. At the limit the subtree is shown
